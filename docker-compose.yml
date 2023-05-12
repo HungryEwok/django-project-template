@@ -1,0 +1,38 @@
+version: '3'
+services:
+
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    env_file:
+      - .env
+    container_name: postgresql
+
+  django:
+    volumes:
+    - static_volume:/app/staticfiles
+    container_name: backend
+    image: $BACKEND_IMAGE
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  backend:
+    external: true
+
+volumes:
+  static_volume:
+    external: true
